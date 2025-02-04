@@ -37,5 +37,4 @@ Benefits:
 - Submit issues and enhancements requests via Github issues
 
 ### Contribute
-- Monocle is community based open source project. We welcome your contributions. Please refer to the CONTRIBUTING and CODE_OF_CONDUCT for guidelines. The [contributor's guide](CONTRIBUTING.md) provides technical details of the project.
-
+- Monocle is community based open source project. We welcome your contributions.
