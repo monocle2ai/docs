@@ -23,7 +23,7 @@ layout: default
 - Instrument your app code
      - Import the Monocle package
        ```
-          from monocle_apptrace.instrumentor import setup_monocle_telemetry
+          from okahu_apptrace.instrumentation.common.instrumentor import setup_monocle_telemetry
        ```
      - Setup instrumentation in your ```main()``` function  
        ``` 
