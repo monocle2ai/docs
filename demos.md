@@ -1,3 +1,5 @@
-layout: page
-title: "Monocle Demos"
-permalink: /demos
+---
+layout: default
+---
+
+# Okahu demo
