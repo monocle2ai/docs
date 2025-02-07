@@ -27,10 +27,10 @@ Benefits:
 
 ## What Monocle provides
 
-- Easy to [use](#use-monocle) code instrumentation
-- OpenTelemetry compatible format for [spans](src/monocle_apptrace/metamodel/spans/span_format.json). 
-- Community-curated and extensible [metamodel](src/monocle_apptrace/metamodel/README.md) for consisent tracing of GenAI components. 
-- Export to local and cloud storage 
+- Easy to use code instrumentation.
+- OpenTelemetry compatible format for spans and traces.
+- Community-curated and extensible metamodel for consisent tracing of GenAI components.
+- Export of telemetry to local and cloud storage.
 
 ## Get involved
 ### Provide feedback
