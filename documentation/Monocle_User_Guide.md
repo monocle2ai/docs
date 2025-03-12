@@ -7,187 +7,252 @@ It’s typically the workflow code components of an application that generate th
 ### Spans
 Spans are the individual steps executed by the application to perform a GenAI related task”, for example app retrieving vectors from DB, app querying LLM for inference etc. The span includes the type of operation, start time, duration and metadata relevant to that step e.g., Model name, parameters and model endpoint/server for an inference request.
 It’s typically the workflow code components of an application that generate the traces for application runs.
+### Metamodel
+Monocle metamodel is the way to manage standardization across all supported GenAI component stack. It includes the list of components that Monocle can identify and extract metadata. This help understanding and analyzing the traces from applications that include multiple components and can evolve over time. This is one of core value that Monocle provides to it's user community.
+### Exporters
+The spans genearated by Monocle need to stored for future analysis. An exporter is a mechanism  Monocle provides multiple 
+### Scopes
+While a trace is a physical/technical tracking of APIs invoked by your application, a scopes is the logical stage of your application can be tracke with Monocle. For example an OpenAI inference API invocation would map to a trace, while a series of inferense and vector store APIs to facilitate a conversion in a chatbot app is a scope. Monocle provides programatic and declarative mechanism to track scope across traces.
+
 
 ## Setup Monocle
-- You can download Monocle library releases from Pypi
-``` 
-    > pip install monocle_apptrace
-```
-
-- For Azure support (to upload traces to Azure), install with the azure extra:
-```
-    > pip install monocle_apptrace[azure]
-```
-
-- For AWS support (to upload traces to AWS), install with the aws extra:
-```
-    > pip install monocle_apptrace[aws]
-```
-
-- You can locally build and install Monocle library from source
-```
-    > pip install .
-```
-- Install the optional test dependencies listed against dev in pyproject.toml in editable mode
-```
-    > pip install -e ".[dev]"
-```
+Monocle supports tracing GenAI applications coded in Python and Typescript.
 
 
-## Using Monocle with your application to generate traces
-### Enable Monocle tracing
-You need to import monocle package and invoke the API ``setup_monocle_telemetry(workflow=<workflow-name>)`` to enable the tracing. The 'workflow-name' is what you define to identify the give application workflow, for example "customer-chatbot". Monocle trace will include this name in every trace. The trace output will include a list of spans in the traces. You can print the output on the console or send it to an HTTP endpoint.
+### Instrument TypeScript GenAI code
+- Get the Monocle package
+  
+```
+    npm install --save monacle2ai
+```
+- Instrument your app code
+```js
+    const { setupMonocle } = require("monacle2ai")
+    setup_monocle_telemetry(workflow_name="your-app-name")
+```
 
-### Using Monocle's out of box support of genAI technology components
-Monocle community has done the hard work of figuring out what to trace and how to extract relevant details from multiple genAI technology components. For example, if you have a python app coded using LlamaIndex and using models hostsed in OpenAI, Monocle can seamlessly trace your app. All you need to do enable Monocle tracing.
-
-### Using Monocle's Support for Adding Custom Attributes
-Monocle provides users with the ability to add custom attributes to various spans, such as inference and retrieval spans, by utilizing the output processor within its metamodel. This feature allows for dynamic attribute assignment through lambda functions, which operate on an arguments dictionary.
-The arguments dictionary contains key-value pairs that can be used to compute custom attributes. The dictionary includes the following components: 
+### Instrument Python GenAI code
+- Get the Monocle package
+  
+```
+    pip install monocle_apptrace 
+```
+- Import the Monocle package
 ```python
-arguments = {"instance":instance, "args":args, "kwargs":kwargs, "output":return_value}
+    from monocle_apptrace import setup_monocle_telemetry
 ```
-By leveraging this dictionary, users can define custom attributes for spans, enabling the integration of additional context and information into the tracing process. The lambda functions used in the attributes field can access and process these values to enrich the span with relevant custom data.
-
-#### Example - Enable Monocle tracing in your application
+- Setup instrumentation in your ```main()``` function  
 ```python
-from monocle_apptrace.instrumentor import setup_monocle_telemetry
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
-from langchain.chains import LLMChain
-from langchain_openai import OpenAI
-from langchain.prompts import PromptTemplate
-
-# Call the setup Monocle telemetry method
-setup_monocle_telemetry(workflow_name = "simple_math_app")
-
-llm = OpenAI()
-prompt = PromptTemplate.from_template("1 + {number} = ")
-
-chain = LLMChain(llm=llm, prompt=prompt)
-chain.invoke({"number":2})
-
-# Request callbacks: Finally, let's use the request `callbacks` to achieve the same result
-chain = LLMChain(llm=llm, prompt=prompt)
-chain.invoke({"number":2}, {"callbacks":[handler]})
-
+    setup_monocle_telemetry(workflow_name="your-app-name")
+```
+## Understanding Monocle traces and spans
+Monocle spans provides detail of each genAI operation executed by your application in a consistent metamodel format. Monocle trace is OpenTelemetry compatible collection of [spans](https://opentelemetry.io/docs/specs/otel/trace/api/#span) with common trace ID. Each span has a JSON structure that include a traceID, a unique span id and timestamp, as per OpenTelemtry spec. There are three types of spans that Monocle generates, 
+- `inference`: When an API is called to generate model inference
+- `retrival`: When an API is called to generate embedding and communicate with vector store
+- `workflow`: A summary of for trace
+The genAI related information captured by Monocle is in the ```attributes``` and ```events``` section of this span JSON. The ```attributes``` section lists various entities that was part of the operation/API which generated this span eg Azure OpenAI as a model inference provider, gpt-4o-mini as a LLM etc.  The ```events``` section includes the data and metadata from this operation, for example prompt to LLM, response from LLM and token details. Here's a [complete example](examples/monocle_trace.json) of traces generated by this [sample python application](examples/chatbot.py) instrumented with Monocle.
+### Open telemetry compatible Span headers
+These span headers are included in every span.
+```json
+    "context": {
+        "trace_id": "0x62672060b60c246e5c7bfdf46d93e2b3",   ==> Trace id common to all spans of this trace
+        "span_id": "0xfbd245d1509ef554",                    ==> Span id, unique to this span
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": "0x34fc562203a4a926",
+    "start_time": "2025-03-12T17:05:57.256058Z",            ==> timestamp of span start
+    "end_time": "2025-03-12T17:05:57.720410Z",              ==> timestamp of span end
 ```
 
-### Accessing monocle trace
-By default monocle generate traces in a json file created in the local directory where the application is running. The file name by default is monocle_trace_{workflow_name}\_{trace_id}\_{timestamp}.json where the trace_id is a unique number generated by monocle for every trace. Please refere to [Trace span json](Monocle_User_Guide.md#trace-span-json). The file path and format can be changed by setting those properties as argement to ```setup_monocle_telemetry()```. For example,
+### Inference span
+The inference span include details of genAI components used in the inference operation.The information is devided into two sections, attributes and events. A given trace can have mulitple inference spans, one per every inference check.
+#### Attribute
+The attribute part of the span provides details of components like model and model hosting service
+```json
+"attributes": {
+    "monocle_apptrace.version": "0.3.0b6",
+    "span.type": "inference",
+    "entity.1.type": "inference.azure_openai",              ==> Inference service type
+    "entity.1.deployment": "gpt-4o-mini",
+    "entity.1.inference_endpoint": "https://my-az-openai.openai.azure.com/",
+    "entity.2.name": "gpt-35-turbo",                        ==> ILLM
+    "entity.2.type": "model.llm.gpt-35-turbo",
+    "entity.count": 2
+}
 ```
-setup_monocle_telemetry(workflow_name = "simple_math_app",
-    span_processors=[BatchSpanProcessor(FileSpanExporter(
-        out_path = "/tmp",
-        file_prefix = "map_app_prod_trace_",
-        time_format = "%Y-%m-%d"))
-    ])
+#### Events
+```json
+"events": [
+    {   
+        "name": "data.input",                               ==> Inputs to LLM
+        "timestamp": "2025-03-12T17:05:59.165628Z",
+        "attributes": {
+            "input": [
+                "{'system': \"You are an expert Q&A system that is trusted around the world.\\nAlways answer the query using the provided context information, and not prior knowledge.\\nSome rules to follow:\\n1. Never directly reference the given context in your answer.\\n2. Avoid statements like 'Based on the context, ...' or 'The context information ...' or anything along those lines.\"}",
+                "{'user': 'What is an americano?'}",
+                "[ChatMessage(role=<MessageRole.SYSTEM: 'system'>, additional_kwargs={}, blocks=[TextBlock(block_type='text', text=\"You are an expert Q&A system that is trusted around the world.\\nAlways answer the query using the provided context information, and not prior knowledge.\\nSome rules to follow:\\n1. Never directly reference the given context in your answer.\\n2. Avoid statements like 'Based on the context, ...' or 'The context information ...' or anything along those lines.\")]), ChatMessage(role=<MessageRole.USER: 'user'>, additional_kwargs={}, blocks=[TextBlock(block_type='text', text='Context information is below.\\n---------------------\\nfile_path: coffee.txt\\n\\nCoffee is a hot drink made from the roasted and ground seeds (coffee beans) of a tropical shrub\\nA latte consists of one or more shots of espresso, served in a glass (or sometimes a cup), into which hot steamed milk is added\\nAmericano is a type of coffee drink prepared by diluting an espresso shot with hot water at a 1:3 to 1:4 ratio, resulting in a drink that retains the complex flavors of espresso, but in a lighter way\\n---------------------\\nGiven the context information and not prior knowledge, answer the query.\\nQuery: What is an americano?\\nAnswer: ')])]"
+            ]   
+        }   
+    },  
+    {   
+        "name": "data.output",                          ==> Responses from LLM
+        "timestamp": "2025-03-12T17:05:59.165655Z",
+        "attributes": {
+            "response": [
+                "An Americano is a type of coffee drink prepared by diluting an espresso shot with hot water at a ratio of 1:3 to 1:4. This process results in a drink that retains the complex flavors of espresso while being lighter in taste."
+            ]   
+        }   
+    },  
+    {   
+        "name": "metadata",                             ==> Token metadata from LLM
+        "timestamp": "2025-03-12T17:05:59.165675Z",
+        "attributes": {
+            "temperature": 0.1,
+            "completion_tokens": 52, 
+            "prompt_tokens": 220,
+            "total_tokens": 272 
+        }   
+    }   
+] 
 ```
-To print the trace on the console, use ```ConsoleSpanExporter()``` instead of ```FileSpanExporter()```
 
-For Azure:
-    Install the Azure support as shown in the setup section, then use  ```AzureBlobSpanExporter()``` to upload the traces to Azure. 
-
-For AWS:
-    Install the AWS support as shown in the setup section, then use  ```S3SpanExporter()``` to upload the traces to an S3 bucket.
- 
-### Leveraging Monocle's extensibility to handle customization 
-When the out of box features from app frameworks are not sufficent, the app developers have to add custom code. For example, if you are extending a LLM class in LlamaIndex to use a model hosted in NVIDIA Triton. This new class is not know to Monocle. You can specify this new class method part of Monocle enabling API and it will be able to trace it.
-
-#### Default configuration of instrumented methods in Monocle
-The following files comprise of default configuration of instrumented methods and span names corresponding to them, for each framework respectively. 
-- [src/monocle_apptrace/langchain/__init__.py](src/monocle_apptrace/langchain/__init__.py),
-- [src/monocle_apptrace/llamaindex/__init__.py](src/monocle_apptrace/llamaindex/__init__.py),
-- [src/monocle_apptrace/haystack/__init__.py](src/monocle_apptrace/haystack/__init__.py)
-
-Following configuration instruments  ```invoke(..)``` of ```RunnableSequence```, aka chain or worflow in Langchain parlance, to emit the span.
+### Retrieval span
+The inference span include details of genAI components used in the inference operation.The information is devided into two sections, attributes and events. A given trace could have multiple retrieval spans.
+#### Attribute
+The atrributes describe embedding model and vector store used
+```json
+"attributes": {
+    "monocle_apptrace.version": "0.3.0b6",
+    "span.type": "retrieval",
+    "entity.1.name": "ChromaVectorStore",                       ==> Vector store
+    "entity.1.type": "vectorstore.ChromaVectorStore",
+    "entity.2.name": "text-embedding-3-large",                  ==> Embedding model
+    "entity.2.type": "model.embedding.text-embedding-3-large",
+    "entity.count": 2
+}   
 ```
+
+#### Events
+The events capture the search and retrieval of vector data
+```json
+"events": [
     {
-        "package": "langchain.schema.runnable",
-        "object": "RunnableSequence",
-        "method": "invoke",
-        "span_name": "langchain.workflow",
-        "wrapper": task_wrapper
+        "name": "data.input",                                   ==> prompts to search
+        "timestamp": "2025-03-12T17:05:57.720379Z",
+        "attributes": {
+            "input": "What is an americano?"
+        }
+    },
+    {
+        "name": "data.output",                                  ==> Context retrieved
+        "timestamp": "2025-03-12T17:05:57.720398Z",
+        "attributes": {
+            "response": "Coffee is a hot drink made from the roasted and ground seeds (coffee beans) of a tropical shrub\nA la..."
+        }
     }
+]
 ```
-#### Example - Monitoring custom methods with Monocle
+
+### Workflow span
+A workflow span captures summary the trace, like start and end of full trace, type of client tools etc. Note that there's only one workflow span for a given trace.
+```json
+"attributes": {
+    "monocle_apptrace.version": "0.3.0b6",
+    "span.type": "workflow",entity.1.name": "my-chatbot",       ==> workflow name set in setup_monocle_telemetry()
+    "entity.1.type": "workflow.llamaindex",                     ==> Type of framework
+    "entity.2.type": "app_hosting.github_codespace",            ==> Application hosting environment
+    "entity.2.name": "my-chatbot-container-xyz",                                    
+    "entity.count": 2
+}
+```
+
+## Exporting traces
+Monocle exporters handle storing the trace for future analysis. By default each trace is stored as a JSON file in the directory where the app runs. You can configure the exporter by setting an environment variable MONOCLE_EXPORTER to exporter setting (listed below). <br>```MONOCLE_EXPOERTER=<comma-separated-list>``` <br>
+ By default Monocle flushes the traces in batch of 10. Note that the traces are written to it destination asynchronously so it doesn't impact applications response. Following are the supported exporters. 
+|Exporter Name| Exporter Setting|Description|Format|Trace destination|Additional configuration|
+|-|-|-|-|-|-|
+|File (default)| `file`|Export to local file system| JSON|local directory||
+|Console|`console`|Export to console|text|Console/stdout||
+|Memory|`memory`|keep in memory|string|Process memory||
+|s3|`s3`|Export to AWS S3 bucket|ND JSON|S3 bucket|Install Monocle aws package dependencies: `pip install monocle_apptrace[aws]` <br> Env variables for s3 exporter: <br> MONOCLE_AWS_ACCESS_KEY_ID or AWS_ACCESS_KEY_ID : AWS access key <br> MONOCLE_AWS_SECRET_ACCESS_KEY or AWS_SECRET_ACCESS_KEY: AWS secret <br> MONOCLE_S3_BUCKET_NAME: S3 bucket where traces will be stored <br> MONOCLE_S3_KEY_PREFIX: ND JSON file name prefixe (default: monocle_trace_)|
+|blob|`blob`|Export to Azure blob store|ND JSON|Blob container|Install Monocle Azure package dependencies: `pip install monocle_apptrace[azure]` <br> Env variables for blob exporter: <br> MONOCLE_BLOB_CONNECTION_STRING: Connection string for Azure blob store <br> MONOCLE_BLOB_CONTAINER_NAME : Blob container to store the trace ndjson files|
+|okahu|`okahu`|Export to Okahu.ai service|JSON|Okahu Tenant|Env variables for Okahu exporter: <br> OKAHU_API_KEY : API key for Okahu tenant|
+
+## Monocle coverage
+### GenAI application frameworks
+|Framework|Python|Typescript|
+|-|-|-|
+|Langchain|✅|✅|
+|Llama Index|✅|✅|
+|HayStack|✅|Not Applicable|
+
+### Inference Services API
+|API|Python|Typescript|
+|-|-|-|
+|OpenAI|✅|❌|
+|AWS Boto|✅|❌|
+
+### Inference
+|Service|Python|Typescript|
+|-|-|-|
+|OpenAI|✅|✅|
+|Azure OpenAI|✅|✅|
+|AWS SageMaker|✅|✅|
+|AWS Bedrock|✅|✅|
+|NVIDIA Triton|✅|❌|
+
+### Vector stores
+|Service|Python|Typescript|
+|-|-|-|
+|Chrome|✅|✅|
+|OpenSearch|✅|✅|
+
+## Using scopes
+Imagine you have a chatbot application that supports a long conversion ie multiple question/answer back and forth between end user and bot. It uses various genAI tech components like LLMs and vector stores. A simple instrumentation will generate a trace per genAI API call (eg invocation of a framework chat or direct OpenAI API). As the app developer or owner, you are more interested in tracking the conversions than just APIs. The scopes in Monocle enables that use case. 
+You can set the scope in application either programatically or declaratively. You can specific a value for scope or Monocle will generate a unique value (GUID) which gives you options to choose what's best suited for your use case. Please see the different API references and configuration reference below for the all the available options.
+TBD!!
+
+### Set scope for a python
 ```python
-from monocle_apptrace.wrapper import WrapperMethod,task_wrapper,atask_wrapper
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
-
-# extend the default wrapped methods list as follows
-app_name = "simple_math_app"
-setup_monocle_telemetry(
-        workflow_name=app_name,
-        span_processors=[BatchSpanProcessor(ConsoleSpanExporter())],
-        wrapper_methods=[
-            WrapperMethod(
-                package="langchain.schema.runnable",
-                object_name="RunnableParallel",
-                method="invoke",
-                span_name="langchain.workflow",
-                wrapper=task_wrapper),
-            WrapperMethod(
-                package="langchain.schema.runnable",
-                object_name="RunnableParallel",
-                method="ainvoke",
-                span_name="langchain.workflow",
-                wrapper=atask_wrapper)
-        ])
-
+from monocle_apptrace import monocle_trace_scope
+...
+with monocle_trace_scope("Conversation"):
+    while True:
+        message = input("How can I help you:")
+        cleaned_message = gaurdrail_chai(message)
+        result = rag_chat_chain.invoke(message)
+```
+The above code will generate two traces (one per chain invocation). All the spans in these traces will have an attribute called `Conversaion` with a unique value.
+```json
+"attributes": {
+    "span.type": "inference",
+    ...
+    "scope.conversation": "0xcb80e6f772968ed50ead80657b09cf52",
 ```
 
-### Going beyond supported genAI components
-- If you are using an application framework, model hosting service/infra etc. that's not currently supported by Monocle, please submit a github issue to add that support. 
-- Monocle community is working on adding an SDK to enable applications to generate their own traces.  
+### Set scope for a typescript method
+TBD
 
-## Understanding the trace output
+## Extending Monocle
+TBD
 
-### Trace span json 
 
-Monocle generates spans which adhere to [Tracing API | OpenTelemetry](https://opentelemetry.io/docs/specs/otel/trace/api/#span) format. The trace output is an array of spans. Each trace has a unique id. Every span has in the trace has this parent ```trace_id```. Please note that ```trace_id``` groups related spans and is auto generated with-in Monocle.
+##Monocle Reference
+### Python APIs
+#### Enable tracing
+#### Trace
+#### Scopes
+#### Customization
 
-| Span JSON      | Description     |
-| ------------- | ------------- |
-| {||
-|  "```name```": "langchain.workflow",|span name and is configurable in [__init.py__](src/monocle_apptrace/langchain/__init__.py) or in ```setup_monocle_telemetry(...)```|
-|  "```context```": {|this gets autogenerated|
-| &ensp;    "```trace_id```": "0xe5269f0e534efa098b240f974220d6b7",||
-| &ensp;       "```span_id```": "0x30b13075eca52f44",||
-| &ensp;       "```trace_state```": "[]"||
-| &ensp;   },||
-|"```kind```": "SpanKind.INTERNAL",| an enum that describes what this span is about. Default value is SpanKind.INTERNAL, as current enums do not cover ML apps |
-|"```parent_id```": null,|if null, this is root span|
-|"```start_time```": "2024-07-16T17:05:15.544861Z",||
-|"```end_time```": "2024-07-16T17:05:43.502007Z",||
-|"```status```": {||
-|&ensp;  "```status_code```": "UNSET"| status of span to OK or ERROR. Default is UNSET|
-|&ensp; },||
-|"```attributes```": {||
-|&ensp; "workflow_name": "ml_rag_app",|defines the name of the service being set in ```setup_monocle_telemetry(...)``` during initialization of instrumentation|
-|&ensp; "workflow_type": "workflow.langchain"|type of framework that generated this span|
-|&ensp; },||
-|"```events```": [|captures the log records|
-|&ensp; {||
-|&ensp;&emsp;  "```name```": "input",|name of the event. If the span is about LLM, then this will be 'input'. For vector store retrieval, this would be 'context_input'|
-|&ensp;&emsp;  "```timestamp```": "2024-07-16T17:05:15.544874Z",||
-|&ensp;&emsp;  "```attributes```": {|captures the 'input' attributes. Based on the workflow of the ML framework being used, the attributes change|
-|&emsp;&emsp;&emsp;    "question": "What is Task Decomposition?",|represents LLM query|
-|&emsp;&emsp;&emsp;    "q_a_pairs": "..." |represents questions and answers for a few shot LLM prompting |
-|&emsp;&emsp;              }||
-|&emsp;         },||
-|&emsp; {||
-|&emsp;&emsp;  "```name```": "output",|represents 'ouput' event of LLM|
-|&emsp;&emsp; "```timestamp```": "2024-07-16T17:05:43.501996Z",||
-|&emsp;&emsp;"```attributes```": {||
-|&emsp;&emsp;&emsp; "response": "Task Decomposition is ..."|response to LLM query. |
-|&emsp;&emsp;&emsp;}||
-|&emsp;&emsp;}||
-|&emsp;    ],||
-|&emsp; "```links```": [],|unused. Ideally this links other causally-related spans,<br/> but as spans are grouped by ```trace_id```, and ```parent_id``` links to parent span, this is unused|
-|&emsp;   "```resource```": {|represents the service name or server or machine or container which generated the span|
-|&emsp;&emsp;&emsp;  "```attributes```": {||
-|&emsp;&emsp;&emsp;&emsp;  "service.name": "ml_rag_app"|only service.name is being populated and defaults to the value of 'workflow_name' |
-|&emsp;&emsp;&emsp;  },||
-|&emsp;&emsp;"```schema_url```": ""|unused|
-|&emsp;&emsp;     }||
-|} | |
+### Typescript APIs
+#### Enable tracing
+#### Trace
+#### Scopes
+#### Customization
+
+### Configuration reference
+#### Scope
+#### Exporters
+
+

@@ -1,0 +1,143 @@
+{
+    "name": "llamaindex.retrieve",
+    "context": {
+        "trace_id": "0x62672060b60c246e5c7bfdf46d93e2b3",
+        "span_id": "0xfbd245d1509ef554",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": "0x34fc562203a4a926",
+    "start_time": "2025-03-12T17:05:57.256058Z",
+    "end_time": "2025-03-12T17:05:57.720410Z",
+    "status": {
+        "status_code": "UNSET"
+    },
+    "attributes": {
+        "monocle_apptrace.version": "0.3.0b6",
+        "span.type": "retrieval",
+        "entity.1.name": "ChromaVectorStore",
+        "entity.1.type": "vectorstore.ChromaVectorStore",
+        "entity.2.name": "text-embedding-3-large",
+        "entity.2.type": "model.embedding.text-embedding-3-large",
+        "entity.count": 2
+    },
+    "events": [
+        {
+            "name": "data.input",
+            "timestamp": "2025-03-12T17:05:57.720379Z",
+            "attributes": {
+                "input": "What is an americano?"
+            }
+        },
+        {
+            "name": "data.output",
+            "timestamp": "2025-03-12T17:05:57.720398Z",
+            "attributes": {
+                "response": "Coffee is a hot drink made from the roasted and ground seeds (coffee beans) of a tropical shrub\nA la..."
+            }
+        }
+    ],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "my-chatbot"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "llamaindex.openai",
+    "context": {
+        "trace_id": "0x62672060b60c246e5c7bfdf46d93e2b3",
+        "span_id": "0x6058c60b373c8a7a",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": "0x34fc562203a4a926",
+    "start_time": "2025-03-12T17:05:57.725486Z",
+    "end_time": "2025-03-12T17:05:59.165687Z",
+    "status": {
+        "status_code": "UNSET"
+    },
+    "attributes": {
+        "monocle_apptrace.version": "0.3.0b6",
+        "span.type": "inference",
+        "entity.1.type": "inference.azure_openai",
+        "entity.1.deployment": "gpt-4o-mini",
+        "entity.1.inference_endpoint": "https://my-az-openai.openai.azure.com/",
+        "entity.2.name": "gpt-35-turbo",
+        "entity.2.type": "model.llm.gpt-35-turbo",
+        "entity.count": 2
+    },
+    "events": [
+        {
+            "name": "data.input",
+            "timestamp": "2025-03-12T17:05:59.165628Z",
+            "attributes": {
+                "input": [
+                    "{'system': \"You are an expert Q&A system that is trusted around the world.\\nAlways answer the query using the provided context information, and not prior knowledge.\\nSome rules to follow:\\n1. Never directly reference the given context in your answer.\\n2. Avoid statements like 'Based on the context, ...' or 'The context information ...' or anything along those lines.\"}",
+                    "{'user': 'What is an americano?'}",
+                    "[ChatMessage(role=<MessageRole.SYSTEM: 'system'>, additional_kwargs={}, blocks=[TextBlock(block_type='text', text=\"You are an expert Q&A system that is trusted around the world.\\nAlways answer the query using the provided context information, and not prior knowledge.\\nSome rules to follow:\\n1. Never directly reference the given context in your answer.\\n2. Avoid statements like 'Based on the context, ...' or 'The context information ...' or anything along those lines.\")]), ChatMessage(role=<MessageRole.USER: 'user'>, additional_kwargs={}, blocks=[TextBlock(block_type='text', text='Context information is below.\\n---------------------\\nfile_path: coffee.txt\\n\\nCoffee is a hot drink made from the roasted and ground seeds (coffee beans) of a tropical shrub\\nA latte consists of one or more shots of espresso, served in a glass (or sometimes a cup), into which hot steamed milk is added\\nAmericano is a type of coffee drink prepared by diluting an espresso shot with hot water at a 1:3 to 1:4 ratio, resulting in a drink that retains the complex flavors of espresso, but in a lighter way\\n---------------------\\nGiven the context information and not prior knowledge, answer the query.\\nQuery: What is an americano?\\nAnswer: ')])]"
+                ]
+            }
+        },
+        {
+            "name": "data.output",
+            "timestamp": "2025-03-12T17:05:59.165655Z",
+            "attributes": {
+                "response": [
+                    "An Americano is a type of coffee drink prepared by diluting an espresso shot with hot water at a ratio of 1:3 to 1:4. This process results in a drink that retains the complex flavors of espresso while being lighter in taste."
+                ]
+            }
+        },
+        {
+            "name": "metadata",
+            "timestamp": "2025-03-12T17:05:59.165675Z",
+            "attributes": {
+                "temperature": 0.1,
+                "completion_tokens": 52,
+                "prompt_tokens": 220,
+                "total_tokens": 272
+            }
+        }
+    ],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "my-chatbot"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "llamaindex.query",
+    "context": {
+        "trace_id": "0x62672060b60c246e5c7bfdf46d93e2b3",
+        "span_id": "0x34fc562203a4a926",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2025-03-12T17:05:57.253629Z",
+    "end_time": "2025-03-12T17:05:59.166061Z",
+    "status": {
+        "status_code": "UNSET"
+    },
+    "attributes": {
+        "monocle_apptrace.version": "0.3.0b6",
+        "span.type": "workflow",
+        "entity.1.name": "my-chatbot",
+        "entity.1.type": "workflow.llamaindex",
+        "entity.2.type": "app_hosting.generic",
+        "entity.2.name": "generic",
+        "entity.count": 2
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "my-chatbot"
+        },
+        "schema_url": ""
+    }
+}
