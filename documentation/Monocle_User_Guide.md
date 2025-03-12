@@ -210,49 +210,11 @@ Monocle exporters handle storing the trace for future analysis. By default each 
 
 ## Using scopes
 Imagine you have a chatbot application that supports a long conversion ie multiple question/answer back and forth between end user and bot. It uses various genAI tech components like LLMs and vector stores. A simple instrumentation will generate a trace per genAI API call (eg invocation of a framework chat or direct OpenAI API). As the app developer or owner, you are more interested in tracking the conversions than just APIs. The scopes in Monocle enables that use case. 
-You can set the scope in application either programatically or declaratively. You can specific a value for scope or Monocle will generate a unique value (GUID) which gives you options to choose what's best suited for your use case. Please see the different API references and configuration reference below for the all the available options.
-TBD!!
+You can set the scope in application either programatically or declaratively. You can specific a value for scope or Monocle will generate a unique value (GUID) which gives you options to choose what's best suited for your use case. Please see the [Monocle scopes guide](Monocle_scopes.md) for the details and examples.
 
-### Set scope for a python
-```python
-from monocle_apptrace import monocle_trace_scope
-...
-with monocle_trace_scope("Conversation"):
-    while True:
-        message = input("How can I help you:")
-        cleaned_message = gaurdrail_chai(message)
-        result = rag_chat_chain.invoke(message)
-```
-The above code will generate two traces (one per chain invocation). All the spans in these traces will have an attribute called `Conversaion` with a unique value.
-```json
-"attributes": {
-    "span.type": "inference",
-    ...
-    "scope.conversation": "0xcb80e6f772968ed50ead80657b09cf52",
-```
-
-### Set scope for a typescript method
-TBD
 
 ## Extending Monocle
-TBD
+If you are using a genAI technology that's not yet supported by Monocle out of the box or have you own proparitory code, you can extend monocle to generate traces in the Monocle format. Please refer to [extending monocle guide](Extending_monocle.md) 
 
-
-##Monocle Reference
-### Python APIs
-#### Enable tracing
-#### Trace
-#### Scopes
-#### Customization
-
-### Typescript APIs
-#### Enable tracing
-#### Trace
-#### Scopes
-#### Customization
-
-### Configuration reference
-#### Scope
-#### Exporters
 
 
