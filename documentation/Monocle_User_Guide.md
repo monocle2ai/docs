@@ -209,12 +209,155 @@ Monocle exporters handle storing the trace for future analysis. By default each 
 |OpenSearch|✅|✅|
 
 ## Using scopes
-Imagine you have a chatbot application that supports a long conversion ie multiple question/answer back and forth between end user and bot. It uses various genAI tech components like LLMs and vector stores. A simple instrumentation will generate a trace per genAI API call (eg invocation of a framework chat or direct OpenAI API). As the app developer or owner, you are more interested in tracking the conversions than just APIs. The scopes in Monocle enables that use case. 
-You can set the scope in application either programatically or declaratively. You can specific a value for scope or Monocle will generate a unique value (GUID) which gives you options to choose what's best suited for your use case. Please see the [Monocle scopes guide](Monocle_scopes.md) for the details and examples.
-
+Imagine you have a chatbot application that supports a long conversion ie multiple question/answer back and forth between end user and bot. It uses various genAI tech components/services like LLMs and vector stores. A simple instrumentation will generate a trace per genAI API call (eg invocation of a framework chat or direct OpenAI API). As the app developer or owner, you are more interested in tracking the conversions than just APIs. The scopes in Monocle enables that use case. 
+You can set the scope in application either programatically or declaratively. You can specific a value for scope or Monocle will generate a unique value (GUID) which gives you options to choose what's best suited for your use case. Please see the [Monocle cookbook](Monocle_scopes.md) for the details and examples.
 
 ## Extending Monocle
 If you are using a genAI technology that's not yet supported by Monocle out of the box or have you own proparitory code, you can extend monocle to generate traces in the Monocle format. Please refer to [extending monocle guide](Extending_monocle.md) 
 
+## Monocle API Referece
+### Python APIs
+#### [`setup_monocle_telemetry`](https://github.com/monocle2ai/monocle/blob/main/src/monocle_apptrace/instrumentation/common/instrumentor.py#L153)
+```python3
+def setup_monocle_telemetry(
+    workflow_name: str,
+    span_processors: List[opentelemetry.sdk.trace.SpanProcessor] = None,
+    span_handlers: Dict[str, monocle_apptrace.instrumentation.common.span_handler.SpanHandler] = None,
+    wrapper_methods: List[Union[dict, monocle_apptrace.instrumentation.common.wrapper_method.WrapperMethod]] = None,
+    union_with_default_methods: bool = True
+) -> None
+```
 
+Set up Monocle telemetry for the application.
 
+**Parameters:**
+
+| Name | Type | Description | Default |
+|---|---|---|---|
+| workflow_name | str | The name of the workflow to be used as the service name in telemetry. | None |
+| span_processors | List[SpanProcessor] | Custom span processors to use instead of the default ones. If None, <br>BatchSpanProcessors with Monocle exporters will be used. | ones |
+| span_handlers | Dict[str, SpanHandler] | Dictionary of span handlers to be used by the instrumentor, mapping handler names to handler objects. | None |
+| wrapper_methods | List[Union[dict, WrapperMethod]] | Custom wrapper methods for instrumentation. If None, default methods will be used. | methods |
+| union_with_default_methods | bool, default=True | If True, combine the provided wrapper_methods with the default methods.<br>If False, only use the provided wrapper_methods. | methods |
+
+### [`start_trace`](https://github.com/monocle2ai/monocle/blob/main/src/monocle_apptrace/instrumentation/common/instrumentor.py#L196)
+
+```python3
+def start_trace(
+    
+)
+```
+
+Starts a new trace. All the spans created after this call will be part of the same trace. 
+
+**Returns:**
+
+| Type | Description |
+|---|---|
+| Token | A token representing the attached context for the workflow span.<br>This token is to be used later to stop the current trace.<br>Returns None if tracing fails. |
+
+**Raises:**
+
+| Type | Description |
+|---|---|
+| Exception | The function catches all exceptions internally and logs a warning. |
+
+### [`stop_scope`](https://github.com/monocle2ai/monocle/blob/main/src/monocle_apptrace/instrumentation/common/instrumentor.py#L209)
+
+```python3
+def stop_scope(
+    token: object
+) -> None
+```
+
+Stop the active scope. All the spans created after this will not have the scope attached.
+
+**Parameters:**
+
+| Name | Type | Description | Default |
+|---|---|---|---|
+| token | None | The token that was returned when the scope was started. | None |
+
+**Returns:**
+
+| Type | Description |
+|---|---|
+| None | None |
+
+#### [`start_scope`](https://github.com/monocle2ai/monocle/blob/main/src/monocle_apptrace/instrumentation/common/instrumentor.py#L229)
+
+```python3
+def start_scope(
+    scope_name: str,
+    scope_value: str = None
+) -> object
+```
+
+Start a new scope with the given name and and optional value. If no value is provided, a random UUID will be generated.
+
+All the spans, across traces created after this call will have the scope attached until the scope is stopped.
+
+**Parameters:**
+
+| Name | Type | Description | Default |
+|---|---|---|---|
+| scope_name | None | The name of the scope. | None |
+| scope_value | None | Optional value of the scope. If None, a random UUID will be generated. | None |
+
+**Returns:**
+
+| Type | Description |
+|---|---|
+| Token | A token representing the attached context for the scope. This token is to be used later to stop the current scope. |
+
+#### [`stop_scope`](https://github.com/monocle2ai/monocle/blob/main/src/monocle_apptrace/instrumentation/common/instrumentor.py#L232)
+
+```python3
+def stop_scope(
+    token: object
+) -> None
+```
+
+Stop the active scope. All the spans created after this will not have the scope attached.
+
+**Parameters:**
+
+| Name | Type | Description | Default |
+|---|---|---|---|
+| token | None | The token that was returned when the scope was started. | None |
+
+**Returns:**
+
+| Type | Description |
+|---|---|
+| None | None |
+
+#### [`monocle_trace_scope`](https://github.com/monocle2ai/monocle/blob/main/src/monocle_apptrace/instrumentation/common/instrumentor.py#L244)
+
+```python3
+def monocle_trace_scope(
+    scope_name: str,
+    scope_value: str = None
+)
+```
+
+Context manager to start and stop a scope. All the spans, across traces created within the encapsulated code will have the scope attached.
+
+**Parameters:**
+
+| Name | Type | Description | Default |
+|---|---|---|---|
+| scope_name | None | The name of the scope. | None |
+| scope_value | None | Optional value of the scope. If None, a random UUID will be generated. | None |
+
+#### [`monocle_trace_http_route`](https://github.com/monocle2ai/monocle/blob/main/src/monocle_apptrace/instrumentation/common/instrumentor.py#L264)
+
+```python3
+def monocle_trace_http_route(
+    func
+)
+```
+
+Decorator to start and stop a continue traces and scope for a http route. It will also initiate new scopes from the http headers if configured in ``monocle_scopes.json``
+
+All the spans, across traces created in the route will have the scope attached.
