@@ -210,10 +210,12 @@ Monocle exporters handle storing the trace for future analysis. By default each 
 
 ## Using scopes
 Imagine you have a chatbot application that supports a long conversion ie multiple question/answer back and forth between end user and bot. It uses various genAI tech components/services like LLMs and vector stores. A simple instrumentation will generate a trace per genAI API call (eg invocation of a framework chat or direct OpenAI API). As the app developer or owner, you are more interested in tracking the conversions than just APIs. The scopes in Monocle enables that use case. 
-You can set the scope in application either programatically or declaratively. You can specific a value for scope or Monocle will generate a unique value (GUID) which gives you options to choose what's best suited for your use case. Please see the [Monocle cookbook](Monocle_scopes.md) for the details and examples.
+You can set the scope in application either programatically or declaratively. You can specific a value for scope or Monocle will generate a unique value (GUID) which gives you options to choose what's best suited for your use case. Please see the [Monocle python cookbook](./Monocle_Cookbook_python.md) for the details and examples.
 
 ## Extending Monocle
-If you are using a genAI technology that's not yet supported by Monocle out of the box or have you own proparitory code, you can extend monocle to generate traces in the Monocle format. Please refer to [extending monocle guide](Extending_monocle.md) 
+If you are using a genAI technology that's not yet supported by Monocle out of the box or have you own proparitory code, you can extend monocle to generate traces in the Monocle format. 
+- [Extending monocle guide for python](Extending_monocle_python.md) and [example](./examples/custom/custom_instrumentation_python/)
+- [Extending monocle guide for typescript](Extending_monocle_ts.md) and [example](./examples/custom/custom_instrumentation_ts/)
 
 ## Monocle API Referece
 ### Python APIs
