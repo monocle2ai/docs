@@ -20,11 +20,11 @@ layout: default
 ```
     pip install monocle_apptrace 
 ```
-- Option 1. Generate traces from your local application without any instrumentation
+- Option 1. Generate traces from your local application without any instrumentation when you control how to run the application.
 ```
    python -m monocle_apptrace your-app-name.py
 ```
-- Option 2. Instrument your app code
+- Option 2. Instrument your app code if it's hosted where you don't control the runtime (eg serverless functions like AWS Lambda)
      - Import the Monocle package
        ```python
           from monocle_apptrace.instrumentation.common.instrumentor import setup_monocle_telemetry
