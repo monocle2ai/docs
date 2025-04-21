@@ -249,8 +249,9 @@ Monocle exporters handle storing the trace for future analysis. By default each 
 ### Inference Services API
 |API|Python|Typescript|
 |-|-|-|
-|OpenAI|✅|❌|
-|AWS Boto|✅|❌|
+|OpenAI|✅|✅|
+|AWS Boto|✅|✅|
+|Anthropic|✅|✅|
 
 ### Inference
 |Service|Python|Typescript|
@@ -259,6 +260,7 @@ Monocle exporters handle storing the trace for future analysis. By default each 
 |Azure OpenAI|✅|✅|
 |AWS SageMaker|✅|✅|
 |AWS Bedrock|✅|✅|
+|Anthropic|✅|✅|
 |NVIDIA Triton|✅|❌|
 
 ### Vector stores
@@ -299,6 +301,7 @@ Set up Monocle telemetry for the application.
 | span_processors | List[SpanProcessor] | Custom span processors to use instead of the default ones. If None, <br>BatchSpanProcessors with Monocle exporters will be used. | ones |
 | span_handlers | Dict[str, SpanHandler] | Dictionary of span handlers to be used by the instrumentor, mapping handler names to handler objects. | None |
 | wrapper_methods | List[Union[dict, WrapperMethod]] | Custom wrapper methods for instrumentation. If None, default methods will be used. | methods |
+| monocle_exporters_list | str, optional | Comma-separated list of exporters to use. This will override the env setting MONOCLE_EXPORTERS. Supported exporters are: s3, blob, okahu, file, memory, console. This can't be combined with `span_processors`.|
 | union_with_default_methods | bool, default=True | If True, combine the provided wrapper_methods with the default methods.<br>If False, only use the provided wrapper_methods. | methods |
 
 ### [`start_trace`](https://github.com/monocle2ai/monocle/blob/main/src/monocle_apptrace/instrumentation/common/instrumentor.py#L196)
