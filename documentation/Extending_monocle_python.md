@@ -258,3 +258,4 @@ To instrument your own code:
 4. Run your application and analyze the generated traces
 
 By customizing the output processors, you can collect exactly the telemetry data you need from any Python method.
+<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=18f8082a-587b-41a3-976b-0117380fa4dd&page=Extending_monocle_python" />

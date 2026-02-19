@@ -425,3 +425,5 @@ def monocle_trace_http_route(
 Decorator to start and stop a continue traces and scope for a http route. It will also initiate new scopes from the http headers if configured in ``monocle_scopes.json``
 
 All the spans, across traces created in the route will have the scope attached.
+
+<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=18f8082a-587b-41a3-976b-0117380fa4dd&page=Monocle_User_Guide" />

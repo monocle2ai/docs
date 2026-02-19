@@ -116,3 +116,5 @@ The above code will generate two traces (one per chain invocation). All the span
     ...
     "scope.conversation": "conversion-id: 0xcb80e6f772968ed50ead80657b09cf52",
 ```
+
+<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=18f8082a-587b-41a3-976b-0117380fa4dd&page=Monocle_Cookbook_python" />

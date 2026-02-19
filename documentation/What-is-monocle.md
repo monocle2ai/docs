@@ -38,3 +38,5 @@ Benefits:
 
 ### Contribute
 - Monocle is community based open source project. We welcome your contributions.
+
+<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=18f8082a-587b-41a3-976b-0117380fa4dd&page=What-is-monocle" />

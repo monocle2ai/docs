@@ -36,3 +36,5 @@ layout: default
 
 # Examine the traces
 By default Monocle traces are written out to a json file `monocle_trace_<workflow>_<traceID>_<timestamp>.json` in the directory where the application is executed. Checkout this [example](./examples/monocle_trace.json)
+
+<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=18f8082a-587b-41a3-976b-0117380fa4dd&page=quickstart" />

@@ -226,3 +226,5 @@ This produces the following trace data:
 ## Conclusion
 
 Monocle's custom instrumentation provides a flexible way to track your GenAI application's behavior. By defining output processors, you can extract meaningful telemetry data from any GenAI component, whether it's your custom code or a third-party library.
+
+<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=18f8082a-587b-41a3-976b-0117380fa4dd&page=Extending_monocle_ts" />
